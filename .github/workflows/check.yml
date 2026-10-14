@@ -1,6 +1,6 @@
 name: Check plugins
 
-# Daily, on every PR, and by hand:
+# Daily, on every PR, on main pushes, and by hand:
 # - the qURL plugin's copy of the agent skill is the served skill, byte for
 #   byte (https://layerv.ai/skills/qurl/SKILL.md is the source of truth);
 # - the marketplace and plugin manifests parse and follow the format, and the
@@ -12,6 +12,8 @@ on:
     # scheduled-load spikes.
     - cron: "47 5 * * *"
   pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
