@@ -16,8 +16,9 @@ with ana@example.com"), or type one of the plugin's commands:
 
 | Type | What it does |
 |---|---|
-| `$qurl:share [who]` | Share the app you're working on privately. Asks who it's for. |
-| `$qurl:approve <code> [CRID]` | Let in a person who asked for access, by the six-digit code they gave you. Never by name. |
+| `$qurl:share [who]` | Share the app you're working on privately: email invitations, email sign-in, review, approved passkeys or a contract. Asks who it's for. |
+| `$qurl:approve [who or what] [CRID]` | Decide a waiting request: a verified email (review), a passkey's approval details, a contract entitlement from your backend, or a six-digit code. Never by name. |
+| `$qurl:access [change] [CRID]` | See who is invited and who has access; invite more addresses, resend, remove someone, or change the mode. |
 
 The first time it shares, Codex installs the `qurl` CLI for you. To get a new
 version of the plugin later, run `codex plugin marketplace upgrade layerv`.

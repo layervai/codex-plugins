@@ -33,7 +33,7 @@ INSTALL_POLICIES = {"AVAILABLE", "INSTALLED_BY_DEFAULT", "NOT_AVAILABLE"}
 AUTH_POLICIES = {"ON_INSTALL", "ON_USE"}
 # Skills that must load only when the user types them, like a slash command,
 # and must keep the CLI floor below which a publish is public by default.
-COMMAND_SKILLS = {"share", "approve"}
+COMMAND_SKILLS = {"share", "approve", "access"}
 CLI_FLOOR = "3.4.1"
 
 errors = []
