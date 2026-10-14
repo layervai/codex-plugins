@@ -1,0 +1,20 @@
+{
+  "name": "layerv",
+  "interface": {
+    "displayName": "LayerV"
+  },
+  "plugins": [
+    {
+      "name": "qurl",
+      "source": {
+        "source": "local",
+        "path": "./plugins/qurl"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

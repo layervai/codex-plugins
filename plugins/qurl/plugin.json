@@ -1,0 +1,29 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "qurl",
+  "version": "1.0.0",
+  "description": "Share an app running on your machine privately from Codex with qURL: no deploy, no account, no API key.",
+  "author": {
+    "name": "LayerV",
+    "url": "https://layerv.ai"
+  },
+  "homepage": "https://qurl.link",
+  "repository": "https://github.com/layervai/codex-plugins",
+  "license": "MIT",
+  "keywords": ["qurl", "share", "localhost", "private", "crid"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "qURL",
+        "shortDescription": "Share your local app privately: no deploy, no account",
+        "longDescription": "Share an app, API or site running on your machine with a person or another agent, privately, without deploying it or opening a port. No account, API key or signup. Includes the qURL agent skill and two commands: $qurl:share and $qurl:approve.",
+        "developerName": "LayerV",
+        "category": "Productivity",
+        "websiteURL": "https://layerv.ai",
+        "defaultPrompt": [
+          "Share the app I'm working on privately with qURL."
+        ]
+      }
+    }
+  }
+}
