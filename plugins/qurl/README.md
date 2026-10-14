@@ -33,8 +33,7 @@ rules hold whatever the skill says.
 Email verification proves control of a mailbox, not who someone is. The modes
 need a `qurl` CLI whose `qurl publish --help` lists `--access`, and a qURL
 service with private access turned on. Where either is missing, Codex says so
-and keeps the app private; apps can still be shared privately with a
-six-digit code per person.
+and shares nothing; it never falls back to a public share or six-digit codes.
 
 The plugin has no MCP server. The skill already drives the `qurl` CLI, which
 needs no account; a bundled server (`@layervai/qurl-mcp`) would start a Node
