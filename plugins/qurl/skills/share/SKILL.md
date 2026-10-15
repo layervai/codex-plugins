@@ -55,8 +55,8 @@ question or a failed step.
    none came back.
 5. If the app was published before with a different mode, publish refuses
    (exit code 7) and suggests `qurl access configure`. Don't run it on your
-   own: show the user the current mode (`qurl status <CRID> -o json`, field
-   `consumer_access`) and ask. A change that lets more people in, such as
+   own: show the user the current mode (`consumer_access` in that app's row
+   of `qurl list -o json`) and ask. A change that lets more people in, such as
    `invite_only` to `email_capture`, is the user's decision.
 6. Set a public name, then check the `name` in the reply:
    `qurl preview set <CRID> --name "<app name>" -o json`. It is public text:

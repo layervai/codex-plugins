@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "qurl",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Share an app running on your machine privately from Codex with qURL, by email invitation, email sign-in, review, approved passkeys or contract: no deploy, no account, no API key.",
   "author": {
     "name": "LayerV",
