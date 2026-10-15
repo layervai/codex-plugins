@@ -29,12 +29,12 @@ or a message says:
 Take the CRID as the user gave it, or from your notes. Read the mode from the
 service, never from the shape of what someone pasted:
 
-```bash
-qurl status <CRID> -o json
-```
-
-`consumer_access.mode` is the mode (`qurl list -o json` shows it too). No
-`consumer_access` means a legacy app: go to D. If what the user brings does not
+Run `qurl list -o json` and find the row in `resources` whose `crid` is the
+CRID (while `has_more` is true and it isn't found, run it again with
+`--cursor <next_cursor>`). Its `consumer_access` has the `mode` and `version`.
+`qurl status` does not show it for a local app. A row
+without `consumer_access` is a legacy app: go to D. No row at all means the
+CRID is not yours or is wrong: stop and say so. If what the user brings does not
 fit that mode (approval details for a review app, a code for a policy app),
 stop and say so.
 
