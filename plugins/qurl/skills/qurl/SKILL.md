@@ -1,6 +1,8 @@
 ---
 name: qurl
 description: Share, publish, or demo an app, API, or site without deploying it or exposing it to the internet, using LayerV's qURL (the `qurl` CLI). Use when the user wants a person or another agent to see or use something running on their machine ("share my app", "send this to my client", "let me check it on my phone", "publish this") or needs temporary private access to a URL, even if they never mention qURL. Also use whenever a task mentions qURL, LayerV, a CRID (a 60-character lowercase ID such as `aea6x7me…`), or a `qurl.link` link, including when the user received one and doesn't know what it is.
+metadata:
+  version: "1"
 ---
 
 # qURL: publish, share, and consume with CRIDs
