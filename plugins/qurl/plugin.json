@@ -32,7 +32,10 @@
           "Share the app I'm working on privately with qURL."
         ],
         "logo": "./assets/logo.png",
-        "composerIcon": "./assets/logo.png"
+        "composerIcon": "./assets/logo.png",
+        "supportURL": "https://layerv.ai/contact",
+        "privacyPolicyURL": "https://layerv.ai/privacy",
+        "termsOfServiceURL": "https://layerv.ai/terms"
       },
       "requires_local_executor": true
     }
