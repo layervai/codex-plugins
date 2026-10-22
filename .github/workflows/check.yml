@@ -48,6 +48,11 @@ jobs:
             echo "::error::could not download $url after retries; nothing was compared. Run the workflow again." >&2
             exit 1
           fi
+          reference=skills/qurl/references/access-policies.md
+          curl -fsSL --proto '=https' --retry 5 --retry-all-errors --retry-delay 10 \
+            --connect-timeout 15 --max-time 60 \
+            https://layerv.ai/skills/qurl/references/access-policies.md -o "$RUNNER_TEMP/access-policies.md"
+          cmp "$RUNNER_TEMP/access-policies.md" "plugins/qurl/$reference"
           if cmp -s "$served" "$bundled"; then
             echo "ok: $bundled is the served skill ($(sha256sum < "$bundled" | cut -c1-12))"
             exit 0

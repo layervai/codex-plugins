@@ -71,3 +71,27 @@ update it:
    ```
 
 Raise the version for any other change to the plugin's files too.
+
+## Requirements and data handling
+
+Sharing a local app requires local command execution on the computer running
+that app. The plugin installs the qURL CLI from LayerV's official GitHub
+release when needed. The computer and app must stay running while shared.
+A cloud session cannot reach an app on your computer through this plugin alone.
+
+The main skill and its private policy reference are bundled. The skill can
+refresh those instructions from `https://layerv.ai/skills/qurl/`. CLI setup
+downloads the official installer from `raw.githubusercontent.com/layervai/`
+and release binaries and checksums from `github.com/layervai/qurl-integrations`.
+
+The CLI creates a device identity on the publisher computer. It sends resource
+and access-management requests to LayerV. Email modes send the recipient email
+addresses the publisher supplies; verification and access records are processed
+by LayerV. Email capture and review disclose the consumer's verified email to
+the publisher. Public app names must contain no secrets or recipient details.
+Access links and invitation tokens are credentials; do not put them in public
+messages or logs. The plugin has no MCP server.
+
+Read LayerV's [privacy policy](https://layerv.ai/privacy) and
+[terms](https://layerv.ai/terms). For support, use
+[LayerV support](https://layerv.ai/contact).
