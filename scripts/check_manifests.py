@@ -101,7 +101,22 @@ def check_plugin(plugin_dir, entry_name):
     if not isinstance(extensions, dict) or not all(isinstance(v, dict) for v in extensions.values()):
         fail(f"{manifest_path}: extensions must map namespaces to objects")
     else:
-        interface = extensions.get("com.openai", {}).get("interface", {})
+        openai = extensions.get("com.openai", {})
+        if openai.get("requires_local_executor") is not True:
+            fail(f"{manifest_path}: qURL needs requires_local_executor: true")
+        interface = openai.get("interface", {})
+        for key, limit in (("displayName", 30), ("shortDescription", 30), ("longDescription", 4000)):
+            value = interface.get(key)
+            if not isinstance(value, str) or not value.strip() or len(value) > limit:
+                fail(f"{manifest_path}: {key} needs 1 to {limit} characters")
+        for key in ("logo", "composerIcon"):
+            value = interface.get(key)
+            if not isinstance(value, str) or not value.startswith("./"):
+                fail(f"{manifest_path}: {key} needs a ./-prefixed asset path")
+                continue
+            asset = (plugin_dir / value).resolve()
+            if plugin_dir.resolve() not in asset.parents or not asset.is_file():
+                fail(f"{manifest_path}: {key} must name a file inside the plugin")
         prompts = interface.get("defaultPrompt", [])
         prompts = [prompts] if isinstance(prompts, str) else prompts
         # Codex drops prompts past these limits (core-plugins manifest.rs).
@@ -122,6 +137,10 @@ def check_plugin(plugin_dir, entry_name):
             fail(f"{skill_md}: frontmatter name {fields.get('name')!r} must be {skill_dir.name!r}")
         if not fields.get("description"):
             fail(f"{skill_md}: frontmatter needs a description")
+        for target in re.findall(r"\]\((references/[^)#]+)\)", skill_md.read_text(encoding="utf-8")):
+            reference = (skill_dir / target).resolve()
+            if skill_dir.resolve() not in reference.parents or not reference.is_file():
+                fail(f"{skill_md}: missing or unsafe bundled reference {target}")
     for command in sorted(COMMAND_SKILLS):
         skill_md = skills_dir / command / "SKILL.md"
         policy = skills_dir / command / "agents" / "openai.yaml"
