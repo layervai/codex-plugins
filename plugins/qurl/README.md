@@ -57,7 +57,7 @@ update it:
    mkdir -p "$source_dir/references"
    curl -fsSL https://layerv.ai/skills/qurl/SKILL.md -o "$source_dir/SKILL.md"
    curl -fsSL https://layerv.ai/skills/qurl/references/access-policies.md -o "$source_dir/references/access-policies.md"
-   git -C "$source_dir" apply "$PWD/scripts/directory-skill.patch" &&
+   git -C "$source_dir" apply < scripts/directory-skill.patch &&
      cp "$source_dir/SKILL.md" plugins/qurl/skills/qurl/SKILL.md &&
      cp "$source_dir/references/access-policies.md" plugins/qurl/skills/qurl/references/access-policies.md
    ```
