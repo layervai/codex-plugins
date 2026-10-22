@@ -2,7 +2,7 @@ name: Check plugins
 
 # Daily, on every PR, on main pushes, and by hand:
 # - the qURL plugin's copy of the agent skill is the served skill, byte for
-#   byte (https://layerv.ai/skills/qurl/SKILL.md is the source of truth);
+#   byte after the directory compliance patch (the served skill is the source);
 # - the marketplace and plugin manifests parse and follow the format, and the
 #   plugin version is a semantic version;
 # - Codex itself installs the plugin from this checkout and loads its skills.
@@ -41,7 +41,9 @@ jobs:
         run: |
           set -euo pipefail
           bundled=plugins/qurl/skills/qurl/SKILL.md
-          served="$RUNNER_TEMP/served-SKILL.md"
+          source_dir="$RUNNER_TEMP/qurl-skill-source"
+          mkdir -p "$source_dir/references"
+          served="$source_dir/SKILL.md"
           url=https://layerv.ai/skills/qurl/SKILL.md
           if ! curl -fsSL --proto '=https' --retry 5 --retry-all-errors --retry-delay 10 \
               --connect-timeout 15 --max-time 60 -o "$served" "$url"; then
@@ -51,14 +53,15 @@ jobs:
           reference=skills/qurl/references/access-policies.md
           curl -fsSL --proto '=https' --retry 5 --retry-all-errors --retry-delay 10 \
             --connect-timeout 15 --max-time 60 \
-            https://layerv.ai/skills/qurl/references/access-policies.md -o "$RUNNER_TEMP/access-policies.md"
-          cmp "$RUNNER_TEMP/access-policies.md" "plugins/qurl/$reference"
+            https://layerv.ai/skills/qurl/references/access-policies.md -o "$source_dir/references/access-policies.md"
+          git -C "$source_dir" apply "$GITHUB_WORKSPACE/scripts/directory-skill.patch"
+          cmp "$source_dir/references/access-policies.md" "plugins/qurl/$reference"
           if cmp -s "$served" "$bundled"; then
-            echo "ok: $bundled is the served skill ($(sha256sum < "$bundled" | cut -c1-12))"
+            echo "ok: $bundled matches the patched served skill ($(sha256sum < "$bundled" | cut -c1-12))"
             exit 0
           fi
           diff -u "$bundled" "$served" | head -n 80 || true
-          echo "::error file=$bundled::$bundled is not the served skill. Fix: curl -fsSL $url -o $bundled && raise \"version\" in plugins/qurl/plugin.json (patch), in one PR." >&2
+          echo "::error file=$bundled::$bundled is not the served skill. Follow the plugin README to update both source files and apply the directory patch, then raise the plugin version." >&2
           exit 1
 
   manifests:
@@ -71,7 +74,9 @@ jobs:
           persist-credentials: false
 
       - name: Check the marketplace and plugin manifests
-        run: python3 -I scripts/check_manifests.py .
+        run: |
+          python3 -I scripts/check_manifests.py .
+          python3 -I -m unittest discover -s scripts -p 'test_*.py'
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:

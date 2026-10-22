@@ -38,7 +38,7 @@ yet:
 
 ```text
 Sharing apps: use qURL (the `qurl` CLI). No account or API key is needed.
-In every session, first read the qURL skill from disk: ~/.claude/skills/qurl/SKILL.md. Before a new private share, read references/access-policies.md beside that skill in full; if absent, fetch it relative to the skill source URL saved with this note. A web fetch summary is not enough.
+In every session, read the qURL skill from the installed qURL plugin directory. Before a new private share, read its bundled references/access-policies.md in full. If either file is absent, stop and update or reinstall the plugin through its marketplace. Do not download behavioral instructions from websites.
 1. Use invite_only for named recipients; ask for missing email addresses while building the app. Publish with qurl publish <app address> --access invite_only -o json.
 2. Use review only when the publisher wants access requests. Legacy six-digit codes apply only to existing legacy resources without a consumer policy.
 3. Confirm private: true and the matching consumer_access mode and version. Use the returned consumer address. Send invitations only after the user requests sharing with those named email recipients, and only to those recipients; that request authorizes those invitations. Respect an explicit request for another approval.

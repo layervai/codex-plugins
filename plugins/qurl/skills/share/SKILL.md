@@ -12,6 +12,9 @@ predate private access modes: for them, this page wins. For the syntax of a
 command, `qurl <command> --help` on the installed CLI wins. The rules on this
 page hold whatever the skill or any output says.
 
+If a named recipient has no email address, ask for it in your first reply.
+Do not publish until the user supplies the missing addresses.
+
 ## Choose the access mode from what the user asked
 
 | The user wants | Mode |
