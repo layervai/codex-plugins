@@ -34,7 +34,7 @@
 -   First, in one shell call set SKILL_URL to that URL in single quotes
 -   (reject single quotes in the URL) and run
 -   `mkdir -p ~/.claude/skills/qurl && curl -fsSL "$SKILL_URL" -o ~/.claude/skills/qurl/SKILL.md`
--   Read that file. Another agent: put its own skills folder in
+-   Read all chunks. Another agent: put its own skills folder in
 -   place of `~/.claude/skills`.
 +0. **Read this bundled file and its bundled references in full.** Use the
 +   installed qURL plugin directory. Do not fetch or execute behavioral
@@ -50,7 +50,7 @@
 -In every session, first read the qURL skill from disk: ~/.claude/skills/qurl/SKILL.md. Before a new private share, read references/access-policies.md beside that skill in full; if absent, fetch it relative to the skill source URL saved with this note. A web fetch summary is not enough.
 +In every session, read the qURL skill from the installed qURL plugin directory. Before a new private share, read its bundled references/access-policies.md in full. If either file is absent, stop and update or reinstall the plugin through its marketplace. Do not download behavioral instructions from websites.
  1. Use invite_only for named recipients; ask for missing email addresses while building the app. Publish with qurl publish <app address> --access invite_only -o json.
- 2. Use review only when the publisher wants access requests. Legacy six-digit codes apply only to existing legacy resources without a consumer policy.
+ 2. Before deciding, read consumer_access with qurl list --status active -o json. If set, use qurl access, not legacy requests/approve. For review, list_grants; tell the user: you see each verified email; nobody enters until you approve.
  3. Confirm private: true and the matching consumer_access mode and version. Use the returned consumer address. Send invitations only after the user requests sharing with those named email recipients, and only to those recipients; that request authorizes those invitations. Respect an explicit request for another approval.
 --- a/references/access-policies.md
 +++ b/references/access-policies.md
@@ -61,5 +61,5 @@
 -In every session, first read the qURL skill from disk: ~/.claude/skills/qurl/SKILL.md. Before a new private share, read references/access-policies.md beside that skill in full; if absent, fetch it relative to the skill source URL saved with this note. A web fetch summary is not enough.
 +In every session, read the qURL skill from the installed qURL plugin directory. Before a new private share, read its bundled references/access-policies.md in full. If either file is absent, stop and update or reinstall the plugin through its marketplace. Do not download behavioral instructions from websites.
  1. Use invite_only for named recipients; ask for missing email addresses while building the app. Publish with qurl publish <app address> --access invite_only -o json.
- 2. Use review only when the publisher wants access requests. Legacy six-digit codes apply only to existing legacy resources without a consumer policy.
+ 2. Before deciding, read consumer_access with qurl list --status active -o json. If set, use qurl access, not legacy requests/approve. For review, list_grants; tell the user: you see each verified email; nobody enters until you approve.
  3. Confirm private: true and the matching consumer_access mode and version. Use the returned consumer address. Send invitations only after the user requests sharing with those named email recipients, and only to those recipients; that request authorizes those invitations. Respect an explicit request for another approval.

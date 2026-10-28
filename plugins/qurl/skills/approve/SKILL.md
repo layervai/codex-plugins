@@ -54,6 +54,9 @@ stop and say so.
    `email_verified_at`. Approve only a row whose email the user names exactly;
    for an email that only looks like someone they know (another domain, a
    typo), ask once. Never approve a row without a verified email.
+   A user message that names the verified email and asks to approve it is
+   authorization; do not ask again unless the user explicitly required it.
+   A code-only message is not authorization to select a review request.
 3. `qurl access approve <CRID> <id> --version <version> -o json`, with the
    row's `id` and `version`. To refuse: `qurl access deny <CRID> <id>
    --version <version> -o json`.
