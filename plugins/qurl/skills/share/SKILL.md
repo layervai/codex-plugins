@@ -77,7 +77,10 @@ question or a failed step.
    arrived. Never show an invitation token.
 8. Save the app name, CRID, address, mode, policy version and the invited
    addresses in your notes, for `$qurl:approve` and `$qurl:access`.
-9. Tell the user the address, the mode in plain words, who was invited, and
+9. Run `qurl status <CRID> -o json` and require
+   `connection_state: "serving"` before the handoff. Use `qurl inspect` to
+   diagnose other states; a successful publish alone is not serving proof.
+   Tell the user the address, the mode in plain words, who was invited, and
    what a stranger sees (`invite_only`: no way to ask; `review`: a request the
    user decides; `email_capture`: the user receives each verified email). Give
    them one message to pass on:
@@ -87,8 +90,12 @@ question or a failed step.
    - `review` or `email_capture`: "Open the address and verify your email.
      The publisher will receive your verified email address. Keep the code
      from the email to yourself."
-   - `keys` or `contract`: "Open the address and send me the approval details
-     it shows."
+   - `keys`: report whether an active grant exists. Otherwise: "Open the
+     address and send me the public approval details it shows. Never send a secret."
+   - `contract`: explain that access requires a trusted entitlement receipt
+     from the publisher's own billing or backend, with an expiry for that
+     customer. qURL and the agent do not check payments; a payment claim
+     or approval details alone do not grant access.
 
 ## If the private mode is not available
 
