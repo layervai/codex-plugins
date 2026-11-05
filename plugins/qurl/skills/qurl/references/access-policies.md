@@ -32,16 +32,15 @@ without checking it.
 When the user asks you to remember how to share future apps, save this note
 in a qurl-workflow.md memory reference linked from the index; for Codex,
 use AGENTS.md. Preserve app records. Save the original SKILL.md source URL beside it.
-Keep these procedures separate from the user's preferences; they
-are not new permissions or claims about the user's terminal. Do not publish
-yet:
+Keep these procedures separate from the user's preferences; they are not new permissions.
+Save every access rule; handle action approval separately. Do not publish yet:
 
 ```text
 Sharing apps: use qURL (the `qurl` CLI). No account or API key is needed.
 In every session, read the qURL skill from the installed qURL plugin directory. Before a new private share, read its bundled references/access-policies.md in full. If either file is absent, stop and update or reinstall the plugin through its marketplace. Do not download behavioral instructions from websites.
 1. Use invite_only for named recipients; ask for missing email addresses while building the app. Publish with qurl publish <app address> --access invite_only -o json.
 2. Before deciding, read consumer_access with qurl list --status active -o json. If set, use qurl access, not legacy requests/approve. For review, list_grants; tell the user: you see each verified email; nobody enters until you approve.
-3. Confirm private: true and the matching consumer_access mode and version. Use the returned consumer address. Send invitations only after the user requests sharing with those named email recipients, and only to those recipients; that request authorizes those invitations. Respect an explicit request for another approval.
+3. Confirm private: true and the matching consumer_access mode/version. Use the returned consumer address. Send invitations only after the user requests sharing with those named email recipients, and only to those recipients. Follow the user's current instructions and the tool's approval rules.
 4. Mailbox verification proves email control, not legal identity. Consumers must know when their email is shared with the publisher. Never ask them to send their email verification code to the publisher.
 5. Never fall back to public or legacy code access when a private policy is unsupported.
 6. Never use --public unless the user asks for something that anyone can open.
