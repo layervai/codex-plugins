@@ -15,6 +15,7 @@ the publisher machine from a compromised app. Public isolation is separate.
 | People ask, and the publisher reviews a verified email | `review` |
 | A publisher-approved passkey or device credential | `keys` |
 | An opaque contract entitlement from the publisher backend | `contract` |
+| Pay once or subscribe through Stripe | `contract` with a Stripe payment policy |
 
 If the publisher names people without email addresses, ask for their email
 addresses while you build the app. If the publisher wants people to request
@@ -117,6 +118,45 @@ the sender accepted the message; it does not prove receipt or enrollment.
 The email lets the recipient verify mailbox control and bind a credential.
 Invite-only resources must offer strangers no request-access action.
 
+### Optional Stripe payments
+
+Check `qurl payments --help` and the payment flags before use. If the deployed
+service refuses them, report the missing support. Keep the resource private.
+
+Run `qurl payments connect -o json` and open the returned Stripe consent URL
+for the publisher. The publisher signs in to their own Stripe account, then
+finishes setup in the LayerV billing page under the same publisher account.
+Anonymous CLI publishers must link their account before setup.
+Consent URLs are private and single use. Never send one to another person.
+Read `qurl payments account -o json` after completion. Use that account ID and an
+active fixed price ID from that account. LayerV collects 3% on each charge,
+including renewals. The publisher pays Stripe's fees.
+
+```bash
+qurl publish http://127.0.0.1:3000 --access contract --contract paid-app --stripe-account acct_EXAMPLE --stripe-price price_EXAMPLE -o json
+qurl access configure <CRID> --mode contract --contract paid-app --version <current-version> --stripe-account acct_EXAMPLE --stripe-price price_EXAMPLE -o json
+```
+
+For an existing CRID, first read its policy and pass its current version (zero if absent). The service stores the next version. Check
+that the reply has `private: true` and the exact account, price, and version.
+A changed policy requires consumers to enroll under that policy again.
+
+A recurring price grants only its paid invoice period. For a one-time price,
+`--payment-access-seconds N` sets the access duration; zero lasts for the
+resource lifetime. Recurring prices require zero. The consumer registers a
+passkey, pays on Stripe, then returns and checks payment. A checkout redirect
+or a consumer claim does not grant access. The service verifies payment.
+
+The consumer uses Manage subscription to recover failed renewals or cancel.
+A full refund or unresolved dispute suspends access. A partial refund keeps
+access and returns the same share of LayerV's fee. Removing the policy or
+resource stops future billing when the payment worker or webhook reconciles
+it. Undelivered purchases and undelivered renewal periods are refunded.
+Existing delivered access follows the publisher's refund policy. If the
+publisher disconnects Stripe, paid access stops. The publisher must cancel
+any remaining subscriptions in Stripe because LayerV no longer has account
+permission to do so.
+
 ### Handoff for every policy
 
 Before the handoff, check that the app and publisher are still serving with
@@ -141,7 +181,7 @@ call it a link or tell the user to send it.
 - Keys: if a key opt-in was submitted, report whether an active grant exists.
   Otherwise explain that the consumer must supply a public credential for
   approval. Never ask for a secret.
-- Contract: tell the publisher: "qURL and I do not check payments. A customer
+- Contract: without a Stripe payment policy, tell the publisher: "qURL and I do not check payments. A customer
   can enter only after your own billing or backend supplies a trusted
   entitlement receipt with an expiry, approved for that customer." A payment
   claim is insufficient. Do not claim an approval without that evidence.
@@ -196,7 +236,7 @@ means the consumer must create a new credential. Otherwise, report the
 conflict and the listed status; do not retry with another version.
 For contract approval, use --entitlement and --expires-at from a trusted
 publisher backend receipt. Do not approve a consumer's claim of payment.
-LayerV and these commands do not verify a payment processor. Contract views
+For contracts without a Stripe payment policy, LayerV and these commands do not verify a payment processor. Contract views
 use a resource-scoped opaque consumer ID and omit email and credential IDs.
 Publisher backends can subscribe to `consumer.subscribed` webhooks. The event
 contains the opaque consumer reference and grant version, without consumer
@@ -236,3 +276,10 @@ entitlement is not access. A refused or unsupported flow must stay private.
 Keep the publisher's name unverified unless the service explicitly reports
 LayerV verification, as the main skill requires. A verified mailbox does
 not turn the publisher name into a verified identity.
+
+Stripe-hosted Checkout and billing portal domains are required. Custom Checkout
+domains and adaptive currency conversion are not supported. Disconnecting Stripe
+blocks paid access; the publisher must cancel or refund remaining subscriptions
+in its own Stripe dashboard, since LayerV then has no API permission. Any policy
+revision closes prior purchases and future subscription billing on reconciliation,
+including a version-only change. Delivered periods are not automatically refunded.

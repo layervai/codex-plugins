@@ -580,7 +580,9 @@ so check afterwards with `qurl grants <CRID> -o json`.
 | "this target is already published as public" (exit code 7), after `--allow-requests` or `--private` | The same. Nothing was changed. | The same. |
 | "this target is already published as private" (exit code 7), after `--public` | The resource is private and stays private. | Ask the user. Public needs a delete and a new CRID. |
 | "unknown flag" for `--allow-requests` or `--public` (exit code 2) | The CLI is older than this guide needs. Nothing was published. | Update (§2). |
-| The session "can't reach a systemd user manager" | You are in a container with no background service manager. Nothing was published. | Run the `--foreground` block under "A local app" below. |
+| The session "can't reach a systemd user manager" (exit code 3) | You are in a container with no background service manager. The resource was created and left off (see the row below). | Run the `--foreground` block under "A local app" below: it serves the same resource, with the same CRID. |
+| "restrict share daemon socket: chmod …/daemon.sock: invalid argument" | qurl's state is on a folder shared from the host, such as a Docker Desktop bind mount on macOS, which cannot set a socket's mode. `--foreground` does not avoid it. The resource was created and left off (next row). | Set `QURL_CONNECTOR_RUNTIME_DIR` to a directory inside the container, such as `/tmp/qurl-run`, for every qurl command, then run the same publish again: it reuses the same CRID. Or put all state on a container volume with `QURL_CONNECTOR_STATE_DIR`. |
+| A publish that fails while starting the daemon or waiting to serve (the error names a systemd user manager, an HTTP proxy, the daemon, its socket, or serving) | publish creates the resource before it starts serving, and on a failure turns sharing off without deleting it. It is in `qurl list --status active`. A failure before that (an app that isn't running, an unsafe directory, a bad flag) creates nothing. | Fix the cause and publish again with the same state: same CRID. Or delete it: match `target_url` in `qurl list --status active -o json`, then `qurl delete <CRID> --yes`. Do this before that state is thrown away: nothing else can delete it. |
 | "this service does not offer access requests yet" (exit code 11), after `--allow-requests` | No CRID was printed. The message says what became of the publish: nothing was published, or the resource was published private without access requests. | Run the command again without `--allow-requests`. Share with an access link or a device key (§4). Tell the user that people can't ask for access on this service yet. |
 | "access requests could not be turned on" | The resource is private. Access requests are off. | Run `qurl requests <CRID> --on`. |
 | `"found_existing": true` | This address was published before. It keeps its CRID, its privacy, and its approved people. | Run `qurl grants <CRID> -o json` and tell the user who has access. |
@@ -611,8 +613,13 @@ qurl publish http://127.0.0.1:3000 --public           # public: anyone who has t
 - Publishing doesn't close any other route to the app. If it's also exposed
   another way (a tunnel, a dev server bound to `0.0.0.0`, a public
   deployment), it stays exposed there. Tell the user.
-- Accepted: `http://` on a loopback host with a port. Rejected: HTTPS, paths,
-  queries, fragments, credentials, `0.0.0.0`, and `*.localhost` subdomains.
+- Publish the app's origin only: `qurl publish http://127.0.0.1:3000`.
+  Do not include a path, query, or fragment in the publish target:
+  `qurl publish http://127.0.0.1:3000/preview/current` is invalid. This
+  validation applies to the target passed to `qurl publish`; it does not
+  establish that routes inside the shared application are unsupported.
+  Local targets require `http://` on a loopback host with a port; HTTPS,
+  credentials, `0.0.0.0`, and `*.localhost` subdomains are rejected.
 - The CLI installs a per-user background daemon (a LaunchAgent on macOS,
   systemd `--user` on Linux, Task Scheduler on Windows), waits until the route
   is **serving**, prints the CRID, and exits. The daemon keeps the share alive
@@ -658,6 +665,25 @@ qurl publish http://127.0.0.1:3000 --public           # public: anyone who has t
   ends background jobs when a command returns, run the publish and the
   commands that use the share in the same command.
 - One machine can serve up to 2000 local shares on a single platform session.
+
+### Share a specific application route
+
+Always send the plain CRID address and the route as a written instruction:
+open `https://qurl.link/<CRID>`, then navigate to
+`/preview/current?mode=review` in the app.
+
+When browser session handoff is enabled, the CRID address can also carry that
+path and query as a convenience:
+`https://qurl.link/<CRID>?path=%2Fpreview%2Fcurrent%3Fmode%3Dreview`.
+The visitor still completes the usual access checks. This continuation requires
+the handoff and its compatible browser agent; a directly opened secret access
+link ignores the `path` parameter. Do not rely on continuation unless it has
+been confirmed on the service in use.
+
+If the visitor lands at the app root, use existing in-app navigation. If access
+to the route is refused, ask the publisher to check the share's access rules.
+Ask the user before changing the app to add a root redirect. Do not put the
+route in `qurl publish`.
 
 ### A remote URL (already hosted somewhere)
 
@@ -1024,7 +1050,10 @@ qurl delete  <CRID> --yes                # PERMANENT: see below
   *different* CRID. **Confirm with the user before any delete.** Without a
   terminal, `delete` requires `--yes`. It refuses rather than waiting on a
   prompt nobody can answer. Deleting something that's already deleted
-  succeeds (`"already_gone": true`).
+  succeeds again with `"deleted": true`; `already_gone` appears only when
+  the service no longer knows the CRID, so don't depend on it. To confirm a
+  delete, run `qurl share <CRID>`: it must fail with "Resource Revoked
+  (HTTP 400)", exit code 5.
 - **To take access away without stopping the app**, use `qurl grants` and
   `qurl requests <CRID> --off` (§4).
 - **`list` paginates.** Keep following `next_cursor` until
@@ -1097,6 +1126,8 @@ qurl delete  <CRID> --yes                # PERMANENT: see below
 
 ## 8. Troubleshooting
 
+Every error below, as the CLI prints it, with its exit code and a tested fix: https://layerv.ai/for-agents/qurl-cli-errors
+
 Email backup is a standard recipient choice. When the preview card offers
 **Email me an access link**, a recipient who cannot or does not want to use a
 passkey selects it and verifies the mailbox. Publishers cannot disable this
@@ -1118,7 +1149,10 @@ Never use a public share to work around a failed prompt.
 | Share shows `retrying` / `platform_denied` in `inspect` | Check `failure_code` in `qurl inspect <CRID> -o json`. Restart that one share. Other shares aren't affected. |
 | "needs its qURL platform assignment refreshed" | Update the CLI. Current versions refresh automatically. |
 | Identity conflict when publishing after a delete | Run `qurl delete <old CRID> --yes` again, or publish with a different `--id`. |
-| `directory component … has unsafe mode 0775` (or any mode with group/other write) | A directory above qurl's state is writable by others. If it's `~/.local` or inside it, run `chmod go-w` on it, tell the user, and retry. For any other directory (your home directory, a shared folder), show the user the command and ask first. |
+| "Other users can write to <dir> (mode 0777), so qURL can't safely keep its files under it", or `directory component … has unsafe mode 0775` (any mode with group/other write; exit code 3) | A directory above qurl's state is writable by others. If it's `~/.local` or inside it, run `chmod go-w` on it, tell the user, and retry. For any other directory (your home directory, a shared folder), show the user the command and ask first. In a container whose home must stay that way, set `QURL_CONNECTOR_STATE_DIR` to a directory with no such parent, such as `/tmp/qurl-state`: a directory inside that home is refused too. |
+| `runtime supervision is "native", not "external"` (exit code 3) | `--supervision external` is only for an app that runs `qurl daemon run` itself and seals its own state (`LAYERV_KEY_PROVIDER=local-key`, key on `LAYERV_LOCAL_KEY_FD`). Ordinary use, a container included, is native: drop the flag. Never switch the mode of an existing state directory. |
+| `qurl share` says "Resource Revoked (HTTP 400)" (exit code 5) | The resource was deleted. That is final. Publish the target again for a new CRID. |
+| "restrict share daemon socket: chmod …/daemon.sock: invalid argument" | See "When publish answers something else" in §3. |
 | `publish` says the session "can't reach a systemd user manager" (older releases mention `systemctl`) | You're in a container or sandbox without systemd. Use `--foreground` as a background job (see §3). The share lasts as long as that process runs. |
 | `https://qurl.link/<CRID>` says "not found", or shows no "Request access" | The CRID may be mistyped, or the resource may be removed, or it is private and takes no requests. A public resource that was published before opening by CRID was turned on does not open this way either. The owner checks `qurl grants <CRID>`, turns on access requests with `qurl requests <CRID> --on`, or shares an access link (§4). |
 | `resolve` is an unknown command | It was renamed. Use `qurl share`. |
