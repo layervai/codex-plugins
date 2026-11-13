@@ -120,32 +120,34 @@ Invite-only resources must offer strangers no request-access action.
 
 ### Optional Stripe payments
 
-Check `qurl payments --help` and the payment flags before use. If the deployed
-service refuses them, report the missing support. Keep the resource private.
+Check `qurl --version` and update if it is older than 4.1.0. From the device
+that published the app, run
+`qurl payments setup` with the full CRID and the publisher’s chosen price in
+USD. A LayerV account is optional for this flow. If prompted, the publisher
+must approve the connection in their own Stripe account and finish any steps
+Stripe requires to accept payments. Keep consent URLs private and single use.
 
-Run `qurl payments connect -o json` and open the returned Stripe consent URL
-for the publisher. The publisher signs in to their own Stripe account, then
-finishes setup in the LayerV billing page under the same publisher account.
-Anonymous CLI publishers must link their account before setup.
-Consent URLs are private and single use. Never send one to another person.
-Read `qurl payments account -o json` after completion. Use that account ID and an
-active fixed price ID from that account. LayerV collects 3% on each charge,
-including renewals. The publisher pays Stripe's fees.
+Use one example after setting `CRID` to the full resource ID:
 
 ```bash
-qurl publish http://127.0.0.1:3000 --access contract --contract paid-app --stripe-account acct_EXAMPLE --stripe-price price_EXAMPLE -o json
-qurl access configure <CRID> --mode contract --contract paid-app --version <current-version> --stripe-account acct_EXAMPLE --stripe-price price_EXAMPLE -o json
+qurl payments setup "$CRID" --price 5.00
+qurl payments setup "$CRID" --price 9.00 --interval month
 ```
 
-For an existing CRID, first read its policy and pass its current version (zero if absent). The service stores the next version. Check
-that the reply has `private: true` and the exact account, price, and version.
-A changed policy requires consumers to enroll under that policy again.
+These commands use production. Confirm the price and billing interval with the
+publisher before enabling paid access. LayerV collects 3% on each payment,
+including renewals. The publisher pays Stripe’s fees.
 
-A recurring price grants only its paid invoice period. For a one-time price,
-`--payment-access-seconds N` sets the access duration; zero lasts for the
-resource lifetime. Recurring prices require zero. The consumer registers a
-passkey, pays on Stripe, then returns and checks payment. A checkout redirect
-or a consumer claim does not grant access. The service verifies payment.
+If the CRID already has a policy, inspect it and pass its current version with
+`--version`. Replacing the policy can revoke prior access. Verify that the
+resource is private and share the payment link returned by the command.
+
+A one-time payment grants access for the resource lifetime by default. If the
+publisher asks for a fixed duration, add `--payment-access-seconds N` to
+`qurl payments setup` for a one-time payment. Omit that flag for subscriptions.
+Each subscription payment grants access for its paid period. The buyer uses a
+passkey and pays in Stripe Checkout. The service verifies payment before it
+grants access.
 
 The consumer uses Manage subscription to recover failed renewals or cancel.
 A full refund or unresolved dispute suspends access. A partial refund keeps
